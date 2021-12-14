@@ -13,7 +13,7 @@ Scala has been chosen as it induces pure functional style.
 ### Stack used
 
 - [Doobie](https://tpolecat.github.io/doobie/) - connection with database
-- PostgreSQL - database for storing embeddings
+- [PostgreSQL](https://www.postgresql.org/) - database for storing embeddings
 - [Http4s](https://http4s.org/) - manage requests and routes
 - [Flyway](https://flywaydb.org/) - migrations
 - [TypeSafe Config](https://github.com/lightbend/config) - reading config file
