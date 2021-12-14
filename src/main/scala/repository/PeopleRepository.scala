@@ -9,15 +9,18 @@ import model.{
 } /// {Importance, Todo, TodoNotFoundError}
 import doobie._
 import doobie.implicits._
+import doobie.postgres._
+import doobie.postgres.implicits._
 
 class PersonRepository(transactor: Transactor[IO]) {
 //  private implicit val importanceMeta: Meta[Importance] =
 //    Meta[String].timap(Importance.unsafeFromString)(_.value)
 
-  def getPeople: Stream[IO, Person] = {
+  def getPeople: IO[List[Person]] = { // Stream[IO, Person]
     sql"SELECT id, name, embedding FROM people"
       .query[Person]
-      .stream
+//      .stream
+      .to[List]
       .transact(transactor)
   }
 
@@ -56,7 +59,7 @@ class PersonRepository(transactor: Transactor[IO]) {
       id: Long,
       person: Person
   ): IO[Either[PersonNotFoundError.type, Person]] = {
-    sql"UPDATE people SET class = ${person.name}, embedding = ${person.embedding} WHERE id = $id".update.run
+    sql"UPDATE people SET name = ${person.name}, embedding = ${person.embedding} WHERE id = $id".update.run
       .transact(transactor)
       .map { affectedRows =>
         if (affectedRows == 1) {

@@ -1,7 +1,7 @@
 lazy val commonSettings = Seq(
   name := "todo http4s doobie",
   version := "1.0-SNAPSHOT",
-  scalaVersion := "2.13.4",
+  scalaVersion := "2.12.11",
   scalacOptions ++= Seq(
     "-deprecation",
     "-Xfatal-warnings",
@@ -12,7 +12,7 @@ lazy val commonSettings = Seq(
 
 lazy val Http4sVersion = "0.21.15"
 
-lazy val DoobieVersion = "0.10.0"
+lazy val DoobieVersion = "0.13.4"
 
 lazy val H2Version = "1.4.200"
 
@@ -28,6 +28,8 @@ lazy val ScalaTestVersion = "3.2.3"
 
 lazy val ScalaMockVersion = "5.1.0"
 
+scalacOptions += "-feature"
+
 lazy val root = (project in file("."))
   .configs(IntegrationTest)
   .settings(
@@ -41,8 +43,7 @@ lazy val root = (project in file("."))
       "org.tpolecat" %% "doobie-core" % DoobieVersion,
       //      "org.tpolecat"          %% "doobie-h2"            % DoobieVersion,
       "org.tpolecat" %% "doobie-postgres" % DoobieVersion,
-//      "org.tpolecat" %% "doobie-contrib-postgresql" % "0.3.0a",
-//      "org.tpolecat" %% "doobie-postgres" % DoobieVersion,
+//      "org.tpolecat" %% "doobie-contrib-postgresql" % "0.3.0",
       "org.tpolecat" %% "doobie-hikari" % DoobieVersion,
       //      "com.h2database"        %  "h2"                   % H2Version,
       "org.flywaydb" % "flyway-core" % FlywayVersion,

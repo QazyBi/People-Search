@@ -13,7 +13,11 @@ package object model {
 //    }
 //  }
 
-  case class Person(id: Option[Long], name: String, embedding: Array[Double])
+  case class Person(
+      id: Option[Long],
+      name: String,
+      embedding: List[Double]
+  )
   case object PersonNotFoundError
 
 //  case class Todo(id: Option[Long], description: String, importance: Importance)

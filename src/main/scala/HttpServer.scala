@@ -7,7 +7,7 @@ import org.http4s.dsl.io._
 import org.http4s.implicits._
 import org.http4s.server.blaze._
 import repository.PersonRepository
-import service.TodoService
+import service.PeopleService
 import scala.concurrent.ExecutionContext.global
 
 object HttpServer {
@@ -41,7 +41,7 @@ object HttpServer {
       repository = new PersonRepository(resources.transactor)
       exitCode <- BlazeServerBuilder[IO](global)
         .bindHttp(resources.config.server.port, resources.config.server.host)
-        .withHttpApp(new TodoService(repository).routes.orNotFound)
+        .withHttpApp(new PeopleService(repository).routes.orNotFound)
         .serve
         .compile
         .lastOrError
