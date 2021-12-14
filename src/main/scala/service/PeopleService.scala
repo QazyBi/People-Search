@@ -1,7 +1,6 @@
 package service
-import scala.language.postfixOps
 import cats.effect.IO
-import fs2.Stream
+//import fs2.Stream
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.{Decoder, Encoder}
@@ -15,21 +14,7 @@ import org.http4s.{HttpRoutes, MediaType, Uri}
 import repository.PersonRepository
 
 class PeopleService(repository: PersonRepository) extends Http4sDsl[IO] {
-//  private implicit val encodeImportance: Encoder[Person] =
-//    Encoder.encodeString.contramap[Person(_.value)
-
-//  private implicit val decodeImportance: Decoder[Importance] =
-//    Decoder.decodeString.map[Person](Importance.unsafeFromString)
-
   val routes = HttpRoutes.of[IO] {
-//    case GET -> Root / "people" =>
-//      Ok(
-//        Stream("[") ++ repository.getPeople
-//          .map(_.asJson.noSpaces)
-//          .intersperse(",") ++ Stream("]"),
-//        `Content-Type`(MediaType.application.json)
-//      )
-
     case GET -> Root / "people" => {
       for {
         p <- repository.getPeople
@@ -58,8 +43,8 @@ class PeopleService(repository: PersonRepository) extends Http4sDsl[IO] {
                   )
                 )
                 .sortWith((p1, p2) => p1._2 > p2._2)
-                .slice(1, 3)
-                .map(_._1.name)
+                .slice(1, 6) // select 5 most similar people
+                .map(_._1)
             )
           case _ => NotFound()
         }
@@ -75,7 +60,7 @@ class PeopleService(repository: PersonRepository) extends Http4sDsl[IO] {
 //          createdPerson.asJson,
 //          Location(Uri.unsafeFromString(s"/people/${createdPerson.id.get}"))
 //        )
-      } yield person // response
+      } yield createdPerson
       Ok(res)
     case req @ PUT -> Root / "people" / LongVar(id) =>
       for {
@@ -89,20 +74,6 @@ class PeopleService(repository: PersonRepository) extends Http4sDsl[IO] {
         case Left(PersonNotFoundError) => NotFound()
         case Right(_)                  => NoContent()
       }
-  }
-
-  object CosineSimilarity {
-    // inspired by: https://gist.github.com/reuben-sutton/2932974
-    def cosineSimilarity(emb1: List[Double], emb2: List[Double]): Double = {
-      dotProduct(emb1, emb2) / (magnitude(emb1) * magnitude(emb2))
-    }
-    def magnitude(x: List[Double]): Double = {
-      math.sqrt(x map (i => i * i) sum)
-    }
-
-    def dotProduct(x: List[Double], y: List[Double]): Double = {
-      (for ((a, b) <- x zip y) yield a * b) sum
-    }
   }
 
   private def peopleResult(result: Either[PersonNotFoundError.type, Person]) = {

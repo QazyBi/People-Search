@@ -14,10 +14,11 @@ package object config {
       password: String,
       threadPoolSize: Int
   )
-
+  // compound class containing both configuration files
   case class Config(server: ServerConfig, database: DatabaseConfig)
 
   object Config {
+    // function to load configuration file into Config class
     def load(
         configFile: String = "application.conf"
     )(implicit cs: ContextShift[IO]): Resource[IO, Config] = {

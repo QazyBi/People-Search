@@ -20,7 +20,6 @@ services:
       - external-network
     depends_on:
       - postgres
-        #condition: service_healthy
     links:
       - postgres
 

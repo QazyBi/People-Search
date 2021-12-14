@@ -16,18 +16,11 @@ RUN \
   rm -r /working/ && \
   sbt sbtVersion
 
-
-#RUN mkdir -p /root/build/project
-#ADD build.sbt /root/build/
-#ADD ./project/plugins.sbt /root/build/project
-#RUN cd /root/build && sbt compile
-
-
+# Set up repository
 RUN mkdir -p /root/project
 WORKDIR /root/project
-
 COPY . /root/project/
-
 EXPOSE 8080
-#CMD bash
+
+# Run web server
 CMD ["sbt", "compile", "run"]

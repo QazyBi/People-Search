@@ -3,19 +3,13 @@ package repository
 import cats.effect.IO
 import doobie.util.transactor.Transactor
 import fs2.Stream
-import model.{
-  Person,
-  PersonNotFoundError
-} /// {Importance, Todo, TodoNotFoundError}
+import model.{Person, PersonNotFoundError}
 import doobie._
 import doobie.implicits._
 import doobie.postgres._
 import doobie.postgres.implicits._
 
 class PersonRepository(transactor: Transactor[IO]) {
-//  private implicit val importanceMeta: Meta[Importance] =
-//    Meta[String].timap(Importance.unsafeFromString)(_.value)
-
   def getPeople: IO[List[Person]] = { // Stream[IO, Person]
     sql"SELECT id, name, embedding FROM people"
       .query[Person]
