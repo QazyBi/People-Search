@@ -139,6 +139,9 @@ case object PersonNotFoundError  // for handling cases when
 
 `ServerApp.scala` - starting point of the project
 
+
+  Tests reside in folders: src/it/scala/PeopleServiceSpec.scala, src/test/scala/service/PeopleServiceSpec.scala
+
 ### What is next?
 
 - Adding image post requests
