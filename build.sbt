@@ -1,5 +1,5 @@
 lazy val commonSettings = Seq(
-  name := "todo http4s doobie",
+  name := "people-search",
   version := "1.0-SNAPSHOT",
   scalaVersion := "2.12.11",
   scalacOptions ++= Seq(
@@ -55,5 +55,7 @@ lazy val root = (project in file("."))
       "ch.qos.logback" % "logback-classic" % LogbackVersion,
       "org.scalatest" %% "scalatest" % ScalaTestVersion % "it,test",
       "org.scalamock" %% "scalamock" % ScalaMockVersion % "test"
+//      "com.github.sbt" % "sbt-native-packager" % "1.9.7"
+//      "com.github.sbt" % "sbt-native-packager_2.12_1.0" % "1.9.7"
     )
   )

@@ -1,0 +1,32 @@
+FROM openjdk:8u232
+
+ARG SBT_VERSION=1.4.1
+
+# Install sbt
+RUN \
+  mkdir /working/ && \
+  cd /working/ && \
+  apt-get update && \
+  apt-get --yes install zip unzip && \
+  curl -s "https://get.sdkman.io" | bash && \	
+  source "/root/.sdkman/bin/sdkman-init.sh" && \
+  sdk install java $(sdk list java | grep -o "8\.[0-9]*\.[0-9]*\.hs-adpt" | head -1) && \
+  sdk install sbt && \
+#  curl -L -o sbt-$SBT_VERSION.deb https://dl.bintray.com/sbt/debian/sbt-$SBT_VERSION.deb && \
+#  dpkg -i sbt-$SBT_VERSION.deb && \
+#  rm sbt-$SBT_VERSION.deb && \
+#  apt-get update && \
+#  apt-get install sbt && \
+  cd && \
+  rm -r /working/ && \
+  sbt sbtVersion
+
+RUN mkdir -p /root/build/project
+ADD build.sbt /root/build/
+ADD ./project/plugins.sbt /root/build/project
+RUN cd /root/build && sbt compile
+
+EXPOSE 9000
+WORKDIR /root/build
+
+CMD sbt compile run
