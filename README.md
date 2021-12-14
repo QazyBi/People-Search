@@ -1,74 +1,145 @@
-# todo-http4s-doobie
-A sample project of a microservice using [http4s](http://http4s.org/), [doobie](http://tpolecat.github.io/doobie/),
-and [circe](https://github.com/circe/circe).
+# People Search
 
-The microservice allows CRUD of todo items with a description and an importance (high, medium, low).
+web service for finding similar people faces in Scala.
 
-## End points
-The end points are:
+### Introduction
 
-Method | Url         | Description
------- | ----------- | -----------
-GET    | /todos      | Returns all todos.
-GET    | /todos/{id} | Returns the todo for the specified id, 404 when no todo present with this id.
-POST   | /todos      | Creates a todo, give as body JSON with the description and importance, returns a 201 with the created todo.
-PUT    | /todos/{id} | Updates an existing todo, give as body JSON with the description and importance, returns a 200 with the updated todo when a todo is present with the specified id, 404 otherwise.
-DELETE | /todos/{id} | Deletes the todo with the specified todo, 404 when no todo present with this id.
+Face recognition is one of the main problems of modern computer vision. There are many solutions developed for finding people from the pictures and authenticating them. Different governments and commercial companies use deep learning solutions, which in its core embed visual features of the person from an image into a vector of numbers.
 
-Here are some examples on how to use the microservice with curl, assuming it runs on the default port 8080:
+This repository helps to build an API for such machine learning systems by providing database CRUD operations on the people face embeddings and clean endpoints for data manipulation.
 
-Create a todo:
-```curl -X POST --header "Content-Type: application/json" --data '{"description": "my todo", "importance": "high"}' http://localhost:8080/todos```
+Scala has been chosen as it induces pure functional style.
 
-Get all todos:
-```curl http://localhost:8080/todos```
+### Stack used
 
-Get a single todo (assuming the id of the todo is 1):
-```curl http://localhost:8080/todos/1```
+- [Doobie](https://tpolecat.github.io/doobie/) - connection with database
+- PostgreSQL - database for storing embeddings
+- [Http4s](https://http4s.org/) - manage requests and routes
+- [Flyway](https://flywaydb.org/) - migrations
+- [TypeSafe Config](https://github.com/lightbend/config) - reading config file
+- [Circe](https://circe.github.io/circe/) - json encoding and decoding
 
-Update a todo (assuming the id of the todo is 1):
-```curl -X PUT --header "Content-Type: application/json" --data '{"description": "my todo", "importance": "low"}' http://localhost:8080/todos/1```
+### How to start
 
-Delete a todo (assuming the id of the todo is 1):
-```curl -X DELETE http://localhost:8080/todos/1```
+To start the project run following commands:
 
-## http4s
-[http4s](http://http4s.org/) is used as the HTTP layer. http4s provides streaming and functional HTTP for Scala.
-This example project uses [cats-effect](https://github.com/typelevel/cats-effect), but is possible to use
-http4s with another effect monad.
+```bash
+# copy repository
+git clone https://github.com/QazyBi/People-Search
+# enter the repository folder
+cd people-search/
+# create container with sbt and code
+docker build . -t sbt
+# start services: web-server and postgresql database
+docker-compose up -d  # -d flag refers to detached mode, remove if not needed
+```
 
-By using an effect monad, side effects are postponed until the last moment.
+### How to use
 
-http4s uses [fs2](https://github.com/functional-streams-for-scala/fs2) for streaming. This allows to return
-streams in the HTTP layer so the response doesn't need to be generated in memory before sending it to the client.
+To get list of people in the database use next command:
 
-In the example project this is done for the `GET /todos` endpoint.
+```bash
+curl [http://localhost:8080/people](http://localhost:8080/people)
+```
 
-## doobie
-[doobie](http://tpolecat.github.io/doobie/) is used to connect to the database. This is a pure functional JDBC layer for Scala.
-This example project uses [cats-effect](https://github.com/typelevel/cats-effect) in combination with doobie,
-but doobie can use another effect monad.
+To get information about specific person using he's id use:
 
-Because both http4s and doobie use an effect monad, the combination is still pure and functional.
+```bash
+curl http://localhost:8080/people/{id}  # specify id, for instance 1
+```
 
-## circe
-[circe](https://github.com/circe/circe) is the recommended JSON library to use with http4s. It provides
-automatic derivation of JSON Encoders and Decoders.
+To search top 5 similar people from the database to the person you specify
 
-## Configuration
-[pureconfig](https://github.com/pureconfig/pureconfig) is used to read the configuration file `application.conf`.
-This library allows reading a configuration into well typed objects.
+```bash
+curl http://localhost:8080/search/{id}  # specify id of queried person, for instance 1
 
-## Database
-[h2](http://www.h2database.com/) is used as a database. This is an in memory database, so when stopping the application, the state of the
-microservice is lost.
+# one possible result
+# [{"id":1203,"name":"Natalie Portman","embedding":[0.31,0.19,0.41,0.76,0.35, 0.3]},
+#  {"id":562,"name":"Keira Knightley","embedding":[0.23,0.21,0.33,0.81,0.29, 0.14]},
+#  {"id":1203,"name":"Britney Spears","embedding":[0.3,0.1,0.35,0.78,0.95, 0.04]},
+#  {"id":1203,"name":"Kate Winslet","embedding":[0.12,0.23,0.45,0.70,0.89, 0.12]},
+#  {"id":1203,"name":"Daisy Ridley","embedding":[0.45,0.16,0.24,0.84,0.91, 0.05]}]
+```
 
-Using [Flyway](https://flywaydb.org/) the database migrations are performed when starting the server.
+To add new record of a person use following command:
 
-## Tests
-This example project contains both unit tests, which mock the repository that accesses the database, and
-integration tests that use the [http4s](http://http4s.org/) HTTP client to perform actual requests.
+```bash
+curl -X POST --header "Content-Type: application/json" --data '{"name": "Martin Odersky", "embedding": [0.3, 0.1, 0.35, 0.85, 0.99, 0.01]}' http://localhost:8080/people
+```
 
-## Running
-You can run the microservice with `sbt run`. By default it listens to port number 8080, you can change
-this in the `application.conf`.
+To update information about person in the database run following:
+
+```bash
+curl -X PUT --header "Content-Type: application/json" --data '{"name": "Martin Odersky", "embedding": [0.3, 0.1, 0.35, 0.85, 0.99]}' http://localhost:8080/people
+```
+
+To delete information about person in the database run following:
+
+```bash
+curl -X DELETE --header "Content-Type: application/json" http://localhost:8080/people/{id}  # specify id, for instance 1
+```
+
+### Project Structure
+
+**resources:**
+
+- `db/migration/V1__create_people.sql` - migrations that will be run when the project initializes
+    
+    ```sql
+    CREATE TABLE people
+    (
+        id        serial       NOT NULL PRIMARY KEY,
+        name     VARCHAR(100)  NOT NULL,
+        embedding float8[]
+    );
+    ```
+    
+
+SQL code creates a table with id, name and embedding fields.
+
+Embedding is a vector of floats representing person in some latent space.
+
+- `application.conf` - configurations of the web server and of the connection to the database
+
+**scala:**
+
+**config** - ****module for reading configuration files(ServerConfig, DatabaseConfig)
+
+**db** - module for database initialization through migrations and producing transactors
+
+**model** - definition of the class mapping fields from PostgreSQL table
+
+```scala
+case class Person(
+      id: Option[Long],  // corresponds to serial
+      name: String,  // corresponds to VARCHAR
+      embedding: List[Double]  // corresponds to SQL float8[]
+)
+case object PersonNotFoundError  // for handling cases when 
+																// person not found in the table
+```
+
+**repository** -  ****definition of methods for interaction with database.
+
+- getPeople - run sql query for selecting all people from the `people` table
+- getPerson - run sql query for selecting person matching with given `Person` id
+- createPerson - run sql query for creating a record in the table given `Person` class instance
+- deletePerson - run sql query for deleting record in the table given `Person` id
+- updatePerson - run sql query for updating record in the table given `Person` class instance
+
+**service** - definition of routes and business logic(in further updates will be separated)
+
+- [CosineSimilarity](https://en.wikipedia.org/wiki/Cosine_similarity) - object which defines useful methods for calculating cosine similarity between two lists of doubles.
+    
+    > Cosine similarity is a good measure of similarity of two vectors. Actively used when comparing two embeddings in machine learning.
+    > 
+- PeopleService - defines routes for http requests and data manipulation.
+
+`HttpServer.scala` - initialization of the web server
+
+`ServerApp.scala` - starting point of the project
+
+### What is next?
+
+- Adding image post requests
+- Adding stream processing
